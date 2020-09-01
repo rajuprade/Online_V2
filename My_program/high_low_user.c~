@@ -1,0 +1,94 @@
+#include<stdio.h>
+#include<pthread.h>
+#include<string.h>
+#include <stdlib.h>
+#include <readline/readline.h>
+#include <readline/history.h>
+
+char *words[]= {"add_user", "delete_user", "sub_array","set","domon"}; //  the compiler would count the characters, leave room for the nul character and store the total of characters in memory the location of which would be returned by the array name
+enum { ADD_USER,DELETE_USER,SUB_ARRAY,SET,DOMON,END } ;
+int ret=0;
+char *name;
+
+
+void print(int i);
+
+void print(int i)
+{
+   switch(i)
+   {
+     case ADD_USER: printf("ADD USER\n");break;
+     case DELETE_USER: printf("DELETE USER\n");break;
+     case SUB_ARRAY:printf("SUB ARRAY\n");break;
+     case SET: printf("SET COMMAND\n");break;
+     case DOMON:printf("DOMON COMMAND\n");break;
+     default : break;
+   }
+}
+
+
+void* highuser( void* parameters)
+{
+   while((name=readline("\n >> "))!=NULL)
+    {
+      if (strcmp(name,"stop")==0)
+      continue;
+      printf("\n");
+      if(name)
+      {ret=1;}
+       else
+        { ret=0; }
+      usleep(10000);
+       if (name[0]!=0)
+            add_history(name);
+     }
+   free(name);
+   return NULL;
+}
+void* lowuser( void* parameters)
+{
+  int i;
+  char *token;
+  char *del = " ";
+  for(;;)
+  {
+      if(ret){
+      fprintf(stderr,"HIGH USER INPUT ===>%s\n",name);
+      //for (i = 0; i < sizeof words/sizeof words[0]; i++) {
+       for (i = 0; i < END; i++) 
+       {
+         if (!strcasecmp(name, words[i]))
+          {
+             fprintf(stderr,"####### STRING is %s %d\n",name,i);
+              print(i);
+          }
+           
+       }
+           token=strtok(name,del); // It works as per our expectation 
+             while(token !=NULL)
+             { 
+               fprintf(stderr," STRTOK retrun %s\n",token); 
+               token =  strtok(NULL," ");
+             }
+      ret=0;
+      usleep(500);
+      }
+      
+   }
+   return NULL;
+}
+
+int main()
+{
+  pthread_t high,low;
+     
+  pthread_create(&high ,NULL,&highuser,NULL);
+  
+  pthread_create(&low,NULL ,&lowuser,NULL);
+   
+  pthread_join(high,NULL);	
+  pthread_join(low,NULL); 
+ 
+  printf(" ALL THREAD CLOSED\n");
+  return 0;
+} 

@@ -1,0 +1,83 @@
+/*
+ * shmclient_readline.c - A shared memory client program to read command and response from Readline server program .
+ */
+
+#include"readline_server.h"
+#include <my_global.h>
+#include <mysql.h>
+#include <stdio.h>
+
+
+int main()
+{
+    int shmid1,shmid2,i,j;
+    key_t key1,key2;
+  char query[1024];
+  char queryn[1024];
+
+MYSQL *conn;
+
+
+ 
+      cmd *c2,*c1;
+      resp *r2,*r1;
+
+
+      c1 = (cmd *)malloc(sizeof(cmd));
+      r1 = (resp *)malloc(sizeof(resp));
+      key1 = 5800;
+      key2 = 5801; 
+   
+   if ((shmid1 = shmget(key1, SHMSZ1,0777)) < 0) {
+        perror("shmget");
+        exit(1);
+    }
+    if ((c2 =(cmd *) shmat(shmid1,NULL, 0)) == (cmd *) -1) {
+        printf("shmat");
+        exit(1);
+    }
+    
+   if( (shmid2 = shmget(key2,SHMSZ2,0777)) < 0 )
+       {
+         printf("shmget");
+         exit(1);
+       }
+     if ( (r2 = (resp *)shmat(shmid2,NULL,0)) == (resp *) -1)
+   
+         {
+           printf("shmat");
+           exit(1);
+         }
+
+
+	// my sql call
+  conn = mysql_init(NULL);
+  mysql_real_connect(conn, "incms", "cms", "cms123", "antdbm", 0, NULL, 0);
+
+       
+  while(1)
+  {
+  // for all antennas
+  for(i=0;i<=0;i++) { 
+
+  
+  // for all mcms
+  for(j=0;j<=5;j++) { 
+  sprintf(query,"VALUES(%s","NULL");
+  sprintf(query,"%s,%d",query,j);
+
+  // copy chan data
+  for(k=0; k<64;k++){
+  sprintf(query,"%s,%s",query,r2->Mon_raw[k]);
+  }
+  sprintf(query,"%s)",query);
+
+  //mcm 0
+  sprintf(queryn,"%s %s","INSERT INTO mcm0",query);
+  mysql_query(conn,queryn);
+  } // mcm
+  } // ant
+  } // while
+        
+        return 0;
+}

@@ -1,0 +1,39 @@
+void* highuser( void* parameters)
+{
+    ANT_CMD *e1;
+    e1 = malloc(sizeof(ANT_CMD));
+    ACK *a1;
+    a1 = malloc(sizeof(ACK));
+    cmd *CMD1;
+    CMD1 = malloc(sizeof(cmd));
+    if(connect_to_server()==ERROR)
+     {
+        fprintf(stderr," ########## UNALBLE to CONNECT ONLINE_V2\n");
+     }
+   else
+     {
+       fprintf(stderr," ######### CONNECTED to TELESET SERVER\n");
+     } 
+
+    for(;;)
+    {     
+        n = read(sfd,e1,sizeof(ANT_CMD));
+                if(!strcmp(ABC,e1->antenna_name))
+               {
+                 fprintf(stderr,"#########===> ABC matches =====>\n");
+                 sprintf(a1->Resp_msg," ACK from %s Antenna",ABC);
+                 write(sfd,a1,sizeof(ACK));
+               }
+                else
+               {
+                 fprintf(stderr,"#########===> ABC dose not matches =====>\n");
+                 strcpy(a1->Ant_name,e1->antenna_name);
+                 sprintf(a1->Resp_msg,"ABC software is for ##### => %s => Antenna\n",ABC);
+                 write(sfd,a1,sizeof(ACK)); 
+               }
+
+        q_store(CMD1);
+     }
+     
+   return NULL;
+}

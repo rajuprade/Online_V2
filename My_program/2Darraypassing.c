@@ -1,0 +1,22 @@
+#include<stdio.h>
+#include<string.h>
+
+void display(char cmd[10][10]);
+
+void display(char cmd[10][10])
+
+{
+  fprintf(stderr,"ANTENNA %s\n",cmd[0]);
+  fprintf(stderr,"System  %s\n",cmd[1]);
+  fprintf(stderr,"Operation name  %s\n",cmd[2]);
+}
+int main()
+{
+  char cmd[10][10];
+
+  strcpy(cmd[0],"C00");
+  strcpy(cmd[1],"Sentinel");
+  strcpy(cmd[2],"set");
+  display(cmd); 
+  return 0;
+}

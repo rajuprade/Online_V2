@@ -1,0 +1,101 @@
+#include"server.h"
+#include"high_user.h"
+#include"mcm_thread.h"
+#include"gui.h"
+#include"pyenv.h"
+#include"socket.h"
+#include"servo.h"
+#include"das.h"
+#include"mcm.h"
+
+#if defined(LIBXML_TREE_ENABLED) && defined(LIBXML_OUTPUT_ENABLED)
+#ifndef THREAD_STACK_SIZE 
+#define THREAD_STACK_SIZE 65536
+#endif
+
+int main(int argc, char *argv[])
+{
+     
+       int s;
+       
+       pthread_t high,gui,servo,pyenv,mcm;
+       pthread_attr_t attrs;
+    
+       pthread_attr_init(&attrs);
+       pthread_attr_setstacksize(&attrs,THREAD_STACK_SIZE );
+       s = pthread_create(&high ,&attrs,&highuser,NULL);
+        if(s)
+        { 
+         fprintf(stderr,"Error in creating HIGHUSER thread %d\n",s);
+          handle_error_en(s, "pthread_create");
+        }
+        else 
+         {
+          fprintf(stderr,"HIGHUSER thread CREATED=> %d\n",s); 
+         }
+       
+       s=pthread_create(&servo,&attrs ,&servosystem,NULL);
+       if(s)
+        { 
+         fprintf(stderr,"Error in creating SERVO thread %d\n",s);
+          handle_error_en(s, "pthread_create");
+        }
+        else 
+         {
+          fprintf(stderr,"SERVO thread CREATED=> %d\n",s); 
+         }
+       s=pthread_create(&gui,&attrs,&gui_interface,NULL);
+       if(s)
+        { 
+         fprintf(stderr,"Error in creating GUI INTERFACE thread %d\n",s);
+          handle_error_en(s, "pthread_create");
+        }
+        else 
+         {
+          fprintf(stderr,"GUI INTERFACE thread CREATED=> %d\n",s); 
+         }
+       s=pthread_create(&pyenv,&attrs,&pyenv_interface,NULL);
+        if(s)
+        { 
+         fprintf(stderr,"Error in creating PYTHON INTERFACE thread %d\n",s);
+          handle_error_en(s, "pthread_create");
+        }
+        else 
+         {
+          fprintf(stderr,"PYTHON INTERFACE thread CREATED=> %d\n",s); 
+         }
+       s=pthread_create(&mcm,&attrs ,&mcmsystem,NULL);
+       if(s)
+        { 
+         fprintf(stderr,"Error in creating MCM SYSTEM thread %d\n",s);
+          handle_error_en(s, "pthread_create");
+        }
+        else 
+         {
+          fprintf(stderr,"MCM SYSTEM thread CREATED=> %d\n",s); 
+         }
+       msgID=create_msgq_(); // Message Queue created for DAS System commands goes to MSG Queue 
+       if(!msgID)
+       {
+         fprintf(stderr,"Sucessfully Created MESSAGE QUEUE ID=%d\n",msgID);
+       }
+       else
+       {  fprintf(stderr,"ERROR => MESSAGE QUEUE\n"); }       
+
+    
+  pthread_join(high,NULL);	
+  pthread_join(pyenv,NULL); 
+  pthread_join(servo,NULL);
+  pthread_join(mcm,NULL);
+  pthread_join(gui,NULL);
+  pthread_attr_destroy(&attrs);
+  
+     return 0; 
+}
+#else
+int main(void) {
+    fprintf(stderr, "server2 support not compiled in\n");
+    exit(1);
+}
+#endif
+

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<commands>
+  <command>
+    <seq>10</seq>
+    <timestamp>18-Feb-2013 11:33:55</timestamp>
+    <system_name>sentinel</system_name>
+    <operation_name>set</operation_name>
+    <Data>
+      <param_name>dmask</param_name>
+      <Argument_Ch1>ffff</Argument_Ch1>
+      <Argument_Ch2>0000</Argument_Ch2>
+    </Data>
+  </command>
+</commands>

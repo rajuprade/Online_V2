@@ -1,0 +1,70 @@
+#include<stdio.h>
+#include<unistd.h>
+#include<math.h>
+#include<string.h>
+#include<time.h>
+#include<malloc.h>
+#define EXIT_FAILURE -1
+int main()
+{
+  char str[128],buff[200],buf[200];
+  char ra0[20], dec0[20],file_name[25],sname[25],epoch[20],fname[25];
+  float ra[3], dec[3], rarad, decrad;
+  int var[3], ant, antbuf;
+  float fbuf,fbuf1,azoff,eloff;
+  int n,i;
+  FILE *f,*fp;
+  
+   fprintf(stderr,"Enter the TRACK file\n");
+    gets(file_name);
+ 
+   f = fopen(file_name,"r"); // read mode
+ 
+   if( f == NULL )
+   {
+      perror("Error while opening the file.\n");
+      return(EXIT_FAILURE);
+   }
+ 
+    while(fgets(str,128,f))
+    {
+      if(*str =='#')continue;
+      sscanf(str,"%s %s %s %s",sname,ra0,dec0,epoch);
+      sscanf(ra0, "%fh%fm%fs", &ra[0], &ra[1], &ra[2]);
+      sscanf(dec0, "%fd%f\'%f\"", &dec[0], &dec[1], &dec[2]);
+      rarad = (ra[0] + ra[1]/60. + ra[2]/3600.)*M_PI/12.;           // 12 h - PI rad - 180 deg
+      decrad = (dec[0] + dec[1]/60. + dec[2]/3600.)*M_PI/180.;
+      fprintf(stderr,"RD DEC values %f %f\n",rarad,decrad);
+    }
+
+   fprintf(stderr,"Enter the TRACK SET file\n");
+    gets(fname);
+ 
+   fp = fopen(fname,"r"); // read mode
+ 
+   if( fp == NULL )
+   {
+      perror("Error while opening the file.\n");
+      return(EXIT_FAILURE);
+   }
+  while(fgets(str,128,fp))
+    {
+      if(*str =='#')continue;
+      sscanf(str,"%s %s %f %f",buff,buf,&fbuf,&fbuf1);
+      sscanf(buff, "%d:%d:%d", &var[0], &var[1], &var[2]);     // az offset (+/-ddd:mm:ss)
+      if (var[0] < 0) {var[1] = -var[1]; var[2] = -var[2];}
+      azoff = var[0] + var[1]/60. + var[2]/3600.;
+       fprintf(stderr,"AZ offset =>%f\n",azoff);
+       sscanf(buf, "%d:%d:%d", &var[0], &var[1], &var[2]);     // el offset (+/-ddd:mm:ss)
+      if (var[0] < 0) {var[1] = -var[1]; var[2] = -var[2];}
+       eloff = var[0] + var[1]/60. + var[2]/3600.;
+        fprintf(stderr,"EL offset =>%f\n",eloff);
+        fbuf = fbuf * M_PI / 180.; 
+        fprintf(stderr,"LATITUDE in RAD  =>%f\n",fbuf);
+        fprintf(stderr,"LONGTITUDE  =>%f\n",fbuf1);
+    }
+
+  fclose(fp);
+  fclose(f);
+ return 0;
+}

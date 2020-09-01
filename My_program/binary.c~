@@ -1,0 +1,20 @@
+/* bfile.c
+
+cc -o bfile bfile.c
+bfile `head -c -n 3404 mybinaryfile`
+
+ */
+#include <stdio.h>
+#include <string.h>
+int main(int argc, char *argv[])
+{
+     if (*argv[1])
+     {
+         if(strlen(argv[1])>3403)
+         {
+                 char  *p=&argv[1][3401];
+                 fprintf(stdout,"%d\n",*(int *)p);
+         }
+      }
+      return 0;
+}

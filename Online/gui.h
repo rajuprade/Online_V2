@@ -1,0 +1,18 @@
+#ifndef _GUI_H
+#define _GUI_H
+
+#include<stdio.h>
+#include<pthread.h>
+#include<string.h>
+#include <stdlib.h>
+
+#define PORT_G 7000
+typedef struct
+{ 
+  char ant_name[20];
+  char sys_name[20];
+} ACK;
+
+void* gui_interface( void* parameters);
+
+#endif

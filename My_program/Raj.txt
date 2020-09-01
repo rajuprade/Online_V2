@@ -1,0 +1,9 @@
+# USER NUMBER
+1
+# SUB ARRAY Number 
+1
+# Number of Antenna in SUB array
+4
+# Names of Antenna in Sub array
+C00 C01 C02 C03
+

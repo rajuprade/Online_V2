@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<responses>
+  <response>
+    <response_type>1</response_type>
+    <seq>11</seq>
+    <timestamp> 9-May-2013 11:10:35</timestamp>
+    <system_name>sentinel</system_name>
+    <Mon_raw>827</Mon_raw>
+    <Mon_raw>824</Mon_raw>
+    <Mon_raw>827</Mon_raw>
+    <Mon_raw>827</Mon_raw>
+    <Mon_raw>824</Mon_raw>
+    <Mon_raw>825</Mon_raw>
+    <Mon_raw>818</Mon_raw>
+    <Mon_raw>827</Mon_raw>
+    <Mon_raw>827</Mon_raw>
+    <Mon_raw>828</Mon_raw>
+    <Mon_raw>823</Mon_raw>
+    <Mon_raw>824</Mon_raw>
+    <Mon_raw>828</Mon_raw>
+    <Mon_raw>827</Mon_raw>
+    <Mon_raw>829</Mon_raw>
+    <Mon_raw>829</Mon_raw>
+    <Mon_raw>829</Mon_raw>
+    <Mon_raw>828</Mon_raw>
+    <Mon_raw>830</Mon_raw>
+    <Mon_raw>829</Mon_raw>
+    <Mon_raw>825</Mon_raw>
+    <Mon_raw>828</Mon_raw>
+    <Mon_raw>829</Mon_raw>
+    <Mon_raw>825</Mon_raw>
+    <Mon_raw>826</Mon_raw>
+    <Mon_raw>824</Mon_raw>
+    <Mon_raw>827</Mon_raw>
+    <Mon_raw>831</Mon_raw>
+    <Mon_raw>827</Mon_raw>
+    <Mon_raw>828</Mon_raw>
+    <Mon_raw>825</Mon_raw>
+    <Mon_raw>830</Mon_raw>
+    <Mon_raw>833</Mon_raw>
+    <Mon_raw>829</Mon_raw>
+    <Mon_raw>827</Mon_raw>
+    <Mon_raw>828</Mon_raw>
+    <Mon_raw>830</Mon_raw>
+    <Mon_raw>826</Mon_raw>
+    <Mon_raw>828</Mon_raw>
+    <Mon_raw>828</Mon_raw>
+    <Mon_raw>828</Mon_raw>
+    <Mon_raw>827</Mon_raw>
+    <Mon_raw>825</Mon_raw>
+    <Mon_raw>829</Mon_raw>
+    <Mon_raw>828</Mon_raw>
+    <Mon_raw>829</Mon_raw>
+    <Mon_raw>827</Mon_raw>
+    <Mon_raw>823</Mon_raw>
+    <Mon_raw>828</Mon_raw>
+    <Mon_raw>830</Mon_raw>
+    <Mon_raw>828</Mon_raw>
+    <Mon_raw>830</Mon_raw>
+    <Mon_raw>826</Mon_raw>
+    <Mon_raw>827</Mon_raw>
+    <Mon_raw>823</Mon_raw>
+    <Mon_raw>826</Mon_raw>
+    <Mon_raw>823</Mon_raw>
+    <Mon_raw>826</Mon_raw>
+    <Mon_raw>828</Mon_raw>
+    <Mon_raw>821</Mon_raw>
+    <Mon_raw>828</Mon_raw>
+    <Mon_raw>827</Mon_raw>
+    <Mon_raw>825</Mon_raw>
+    <Mon_raw>827</Mon_raw>
+    <Mon_sum>No summery !!</Mon_sum>
+    <response_message>System validated : Sentinel</response_message>
+    <response_message>Command validated : Sentinal Controlling</response_message>
+    <response_message>Digital Mask : ffff 5555</response_message>
+  </response>
+</responses>

@@ -1,0 +1,140 @@
+<html>
+<body>
+<head>
+<style>
+body
+{
+background-image:url('/home/raj/public_html/illena.jpg');
+background-color:#d0e4fe;
+background-repeat:no-repeat;
+}
+h1
+{
+ color:red;
+ text-align:center;
+ text-decoration:upperline;
+}
+b
+{
+ color:green;
+ text-align:center;
+}
+span
+{
+ color:blue;
+ text-align:center;
+}
+table, td, th
+{
+border:1px solid green;
+}
+th
+{
+background-color:green;
+color:white;
+}
+</style>
+<h1>WEB MONITORING OF COMMAND SENT</h1>
+<div>
+<b>SEQ NUMBER=></b><strong> <span id="seq"></strong></span><br /><br />
+<b>TIMESTAMP=></b> <span id="timestamp"></span><br /><br />
+<b>SYSTEM NAME=></b> <span id="system_name"></span><br /><br />
+<b>OPERATION NAME=></b> <span id="operation_name"></span><br /><br />
+<!-- <p id="demo">This is a paragraph.</p>
+<button type="button" onclick="displayDate()">SHOW DATE</button> -->
+</div>
+<table>
+<tr>
+<th>Param_name</th>
+<th>Argument_Ch1</th>
+<th>Argument_Ch2</th>
+</tr>
+<tr>
+<td></b><span id="param_name_0"></span></td>
+<td><span id="Argument_Ch1_0"></span></td>
+<td><span id="Argument_Ch2_0"></span></td>
+</tr>
+<tr>
+<td></b><span id="param_name_1"></span></td>
+<td><span id="Argument_Ch1_1"></span></td>
+<td><span id="Argument_Ch2_1"></span></td>
+</tr>
+<tr>
+<td></b><span id="param_name_2"></span></td>
+<td><span id="Argument_Ch1_2"></span></td>
+<td><span id="Argument_Ch2_2"></span></td>
+</tr>
+<tr>
+<td></b><span id="param_name_3"></span></td>
+<td><span id="Argument_Ch1_3"></span></td>
+<td><span id="Argument_Ch2_3"></span></td>
+</tr>
+<tr>
+<td></b><span id="param_name_4"></span></td>
+<td><span id="Argument_Ch1_4"></span></td>
+<td><span id="Argument_Ch2_4"></span></td>
+</tr>
+<tr>
+<td></b><span id="param_name_5"></span></td>
+<td><span id="Argument_Ch1_5"></span></td>
+<td><span id="Argument_Ch2_5"></span></td>
+</tr>
+<tr>
+<td></b><span id="param_name_6"></span></td>
+<td><span id="Argument_Ch1_6"></span></td>
+<td><span id="Argument_Ch2_6"></span></td>
+</tr>
+</table>
+<script>
+function displayDate()
+{
+document.getElementById("demo").innerHTML=Date();
+}
+if (window.XMLHttpRequest)
+  {// code for IE7+, Firefox, Chrome, Opera, Safari
+  xmlhttp=new XMLHttpRequest();
+  }
+else
+  {// code for IE6, IE5
+  xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+  }
+xmlhttp.open("GET","/home/teleset/Desktop/CS.xml",false);
+xmlhttp.send();
+xmlDoc=xmlhttp.responseXML;
+
+document.getElementById("seq").innerHTML=xmlDoc.getElementsByTagName("seq")[0].childNodes[0].nodeValue;
+document.getElementById("timestamp").innerHTML=xmlDoc.getElementsByTagName("timestamp")[0].childNodes[0].nodeValue;
+document.getElementById("system_name").innerHTML=xmlDoc.getElementsByTagName("system_name")[0].childNodes[0].nodeValue;
+document.getElementById("operation_name").innerHTML=xmlDoc.getElementsByTagName("operation_name")[0].childNodes[0].nodeValue;
+
+ document.getElementById("param_name_0").innerHTML=xmlDoc.getElementsByTagName("param_name")[0].childNodes[0].nodeValue;
+ document.getElementById("Argument_Ch1_0").innerHTML=xmlDoc.getElementsByTagName("Argument_Ch1")[0].childNodes[0].nodeValue;
+ document.getElementById("Argument_Ch2_0").innerHTML=xmlDoc.getElementsByTagName("Argument_Ch2")[0].childNodes[0].nodeValue;
+
+ document.getElementById("param_name_1").innerHTML=xmlDoc.getElementsByTagName("param_name")[1].childNodes[0].nodeValue;
+ document.getElementById("Argument_Ch1_1").innerHTML=xmlDoc.getElementsByTagName("Argument_Ch1")[1].childNodes[0].nodeValue;
+ document.getElementById("Argument_Ch2_1").innerHTML=xmlDoc.getElementsByTagName("Argument_Ch2")[1].childNodes[0].nodeValue;
+
+document.getElementById("param_name_2").innerHTML=xmlDoc.getElementsByTagName("param_name")[2].childNodes[0].nodeValue;
+ document.getElementById("Argument_Ch1_2").innerHTML=xmlDoc.getElementsByTagName("Argument_Ch1")[2].childNodes[0].nodeValue;
+ document.getElementById("Argument_Ch2_2").innerHTML=xmlDoc.getElementsByTagName("Argument_Ch2")[2].childNodes[0].nodeValue;
+
+document.getElementById("param_name_3").innerHTML=xmlDoc.getElementsByTagName("param_name")[3].childNodes[0].nodeValue;
+ document.getElementById("Argument_Ch1_3").innerHTML=xmlDoc.getElementsByTagName("Argument_Ch1")[3].childNodes[0].nodeValue;
+ document.getElementById("Argument_Ch2_3").innerHTML=xmlDoc.getElementsByTagName("Argument_Ch2")[3].childNodes[0].nodeValue;
+
+document.getElementById("param_name_4").innerHTML=xmlDoc.getElementsByTagName("param_name")[4].childNodes[0].nodeValue;
+ document.getElementById("Argument_Ch1_4").innerHTML=xmlDoc.getElementsByTagName("Argument_Ch1")[4].childNodes[0].nodeValue;
+ document.getElementById("Argument_Ch2_4").innerHTML=xmlDoc.getElementsByTagName("Argument_Ch2")[4].childNodes[0].nodeValue;
+
+document.getElementById("param_name_5").innerHTML=xmlDoc.getElementsByTagName("param_name")[5].childNodes[0].nodeValue;
+ document.getElementById("Argument_Ch1_5").innerHTML=xmlDoc.getElementsByTagName("Argument_Ch1")[5].childNodes[0].nodeValue;
+ document.getElementById("Argument_Ch2_5").innerHTML=xmlDoc.getElementsByTagName("Argument_Ch2")[5].childNodes[0].nodeValue;
+
+document.getElementById("param_name_6").innerHTML=xmlDoc.getElementsByTagName("param_name")[6].childNodes[0].nodeValue;
+ document.getElementById("Argument_Ch1_6").innerHTML=xmlDoc.getElementsByTagName("Argument_Ch1")[6].childNodes[0].nodeValue;
+ document.getElementById("Argument_Ch2_6").innerHTML=xmlDoc.getElementsByTagName("Argument_Ch2")[6].childNodes[0].nodeValue;
+</script>
+</head>
+</body>
+</html>

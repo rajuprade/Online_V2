@@ -1,0 +1,851 @@
+#include"server.h"
+#include"high_user.h"
+#include"mcm_thread.h"
+#include"gui.h"
+#include"pyenv.h"
+#include"socket.h"
+#include"servo.h"
+#include"das.h"
+
+#if defined(LIBXML_TREE_ENABLED) && defined(LIBXML_OUTPUT_ENABLED)
+
+
+int main(int argc, char *argv[])
+{
+     int i;
+    // int socfd[30];
+     pthread_t sen_th,C01_sen_th,C02_sen_th,C03_sen_th,C04_sen_th,C05_sen_th,C06_sen_th,C09_sen_th,C08_sen_th;
+     pthread_t fiber_th,C01_fiber_th,C02_fiber_th,C03_fiber_th,C04_fiber_th,C05_fiber_th,C06_fiber_th,
+               C09_fiber_th,C08_fiber_th;
+     pthread_t front_th,C01_front_th,C02_front_th,C03_front_th,C04_front_th,C05_front_th,C06_front_th,C09_front_th,
+               C08_front_th;
+     pthread_t backend_th,C01_backend_th,C02_backend_th,C03_backend_th,C04_backend_th,C05_backend_th,C06_backend_th
+                ,C09_backend_th,C08_backend_th;
+     pthread_t self_th,C01_self_th,C02_self_th,C03_self_th,C04_self_th,C05_self_th,C06_self_th,C09_self_th,C08_self_th;
+
+     pthread_attr_t custom_attr_fifo;	
+     //int fifo_max_prio;	
+     struct sched_param fifo_param;	
+     pthread_t high,low;
+     int server_fd, *new_sock,Ret,sockfd;
+     
+    pthread_t gui,servo,pyenv;
+    pthread_mutex_init(&lock,NULL);
+   
+    pthread_attr_init(&custom_attr_fifo);	
+    pthread_attr_setschedpolicy(&custom_attr_fifo, SCHED_FIFO);	
+    fifo_param.sched_priority = sched_get_priority_max(SCHED_FIFO);	
+    pthread_attr_setschedparam(&custom_attr_fifo, &fifo_param); 
+	
+   /*  setdata *set;  
+     set = (setdata *)malloc(sizeof(setdata)); */
+      
+     /* ANS *an;
+      an = malloc(sizeof(ANS));*/
+     
+    /*  printf("Enter 0 for file input and 1 for user input\n");
+      scanf("%d",&n);
+      exec(set,n);
+      write_us_shm(set); */
+    
+       pthread_create(&high ,NULL,&highuser,NULL);
+       pthread_create(&servo,NULL ,&servosystem,NULL);
+       pthread_create(&gui,NULL ,&gui_interface,NULL);
+       pthread_create(&pyenv,NULL ,&pyenv_interface,NULL);
+       msgID=create_msgq_(); // Message Queue created for DAS System commands goes to MSG Queue 
+       if(!msgID)
+       {
+         fprintf(stderr,"Sucessfully Created MESSAGE QUEUE ID=%d\n",msgID);
+       }
+       else
+       {  fprintf(stderr,"ERROR => MESSAGE QUEUE\n"); }       
+
+     sockfd=init_server(PORT);
+     if(sockfd == -1)
+     {
+       fprintf(stderr," ####### MAIN SERVER FAILS ##########\n");
+     }
+    clilen = sizeof(cli_addr); 
+        while(1)
+       {  
+            i=0;
+            fprintf(stderr,"############# SERVER WANTING FOR CLIENT CONNECTION #####\n");
+            server_fd = accept(sockfd,(struct sockaddr *) &cli_addr,&clilen); 
+            if(!strcmp(inet_ntoa(cli_addr.sin_addr),SENTINEL_IP))
+                     { 
+                        new_sock = malloc(1);
+                        *new_sock = server_fd;
+                        fprintf(stderr," ACCEPTED CONNECTION FROM MCM DEVICE %s\n",inet_ntoa(cli_addr.sin_addr));
+                         Ret= pthread_create(&sen_th,NULL,&sentinel_thread,(void *)new_sock); 
+                          if(Ret)
+                           { 
+                             fprintf(stderr,"Error in Opening SENTINEL thread %d\n",Ret);
+                              handle_error_en(Ret, "pthread_create");
+                           }
+                          else 
+                          {
+                            fprintf(stderr,"SENTINEL thread opened succesfully=> %d\n",Ret); 
+                         }
+                     }
+                     else if(!strcmp(inet_ntoa(cli_addr.sin_addr),FIBER_IP))
+                     { 
+                        new_sock = malloc(1);
+                        *new_sock = server_fd;
+                        fprintf(stderr," ACCEPTED CONNECTION FROM MCM DEVICE %s\n",inet_ntoa(cli_addr.sin_addr));
+                         Ret= pthread_create(&fiber_th,NULL,&fiber_thread,(void *)new_sock); 
+                          if(Ret)
+                           { 
+                             fprintf(stderr,"Error in Opening FIBER thread %d\n",Ret);
+                               handle_error_en(Ret, "pthread_create");
+                           }
+                          else 
+                          {
+                            fprintf(stderr,"FIBER thread opened succesfully=> %d\n",Ret); 
+                         }
+                     }
+                      else if(!strcmp(inet_ntoa(cli_addr.sin_addr),FRONT_IP))
+                      { 
+                        new_sock = malloc(1);
+                        *new_sock = server_fd;
+                        fprintf(stderr," ACCEPTED CONNECTION FROM MCM DEVICE %s\n",inet_ntoa(cli_addr.sin_addr));
+                         Ret= pthread_create(&front_th,NULL,&front_thread,(void *)new_sock); 
+                          if(Ret)
+                           { 
+                             fprintf(stderr,"Error in Opening FRONT thread %d\n",Ret);
+                             handle_error_en(Ret, "pthread_create");
+                           }
+                          else 
+                          {
+                            fprintf(stderr,"FRONT thread opened succesfully=> %d\n",Ret); 
+                         }
+                     }
+                      else if(!strcmp(inet_ntoa(cli_addr.sin_addr),BACKEND_IP))
+                      { 
+                        new_sock = malloc(1);
+                        *new_sock = server_fd;
+                        fprintf(stderr," ACCEPTED CONNECTION FROM MCM DEVICE %s\n",inet_ntoa(cli_addr.sin_addr));
+                         Ret= pthread_create(&backend_th,NULL,&backend_thread,(void *)new_sock); 
+                          if(Ret)
+                           { 
+                             fprintf(stderr,"Error in Opening BACKEND thread %d\n",Ret);
+                              handle_error_en(Ret, "pthread_create");
+                           }
+                          else 
+                          {
+                            fprintf(stderr,"BACKEND thread opened succesfully=> %d\n",Ret); 
+                         }
+                     }
+                      else if(!strcmp(inet_ntoa(cli_addr.sin_addr),SELF_IP))
+                      { 
+                        new_sock = malloc(1);
+                        *new_sock = server_fd;
+                        fprintf(stderr," ACCEPTED CONNECTION FROM MCM DEVICE %s\n",inet_ntoa(cli_addr.sin_addr));
+                         Ret= pthread_create(&self_th,NULL,&self_thread,(void *)new_sock); 
+                          if(Ret)
+                           { 
+                             fprintf(stderr,"Error in Opening SELF thread %d\n",Ret);
+                              handle_error_en(Ret, "pthread_create");
+                           }
+                          else 
+                          {
+                            fprintf(stderr,"SELF thread opened succesfully=> %d\n",Ret); 
+                         }
+                     }
+                     else if(!strcmp(inet_ntoa(cli_addr.sin_addr),C01_SENTINEL_IP))
+                      { 
+                        new_sock = malloc(1);
+                        *new_sock = server_fd;
+                        fprintf(stderr," ACCEPTED CONNECTION FROM MCM DEVICE %s\n",inet_ntoa(cli_addr.sin_addr));
+                         Ret= pthread_create(&C01_sen_th,NULL,&C01_sentinel_thread,(void *)new_sock); 
+                          if(Ret)
+                           { 
+                             fprintf(stderr,"Error in Opening C01 Sentinel thread %d\n",Ret);
+                              handle_error_en(Ret, "pthread_create");
+                           }
+                          else 
+                          {
+                            fprintf(stderr,"C01 SENTINEL thread opened succesfully=> %d\n",Ret); 
+                         }
+                     }
+                     else if(!strcmp(inet_ntoa(cli_addr.sin_addr),C01_FRONT_IP))
+                      { 
+                        new_sock = malloc(1);
+                        *new_sock = server_fd;
+                        fprintf(stderr," ACCEPTED CONNECTION FROM MCM DEVICE %s\n",inet_ntoa(cli_addr.sin_addr));
+                         Ret= pthread_create(&C01_front_th,NULL,&C01_front_thread,(void *)new_sock); 
+                          if(Ret)
+                           { 
+                             fprintf(stderr,"Error in Opening C01 FRONT thread %d\n",Ret);
+                               handle_error_en(Ret, "pthread_create");
+                           }
+                          else 
+                          {
+                            fprintf(stderr,"C01 FRONT END thread opened succesfully=> %d\n",Ret); 
+                         }
+                     }
+                     else if(!strcmp(inet_ntoa(cli_addr.sin_addr),C01_FIBER_IP))
+                      { 
+                        new_sock = malloc(1);
+                        *new_sock = server_fd;
+                        fprintf(stderr," ACCEPTED CONNECTION FROM MCM DEVICE %s\n",inet_ntoa(cli_addr.sin_addr));
+                         Ret= pthread_create(&C01_fiber_th,NULL,&C01_fiber_thread,(void *)new_sock); 
+                          if(Ret)
+                           { 
+                             fprintf(stderr,"Error in Opening C01 OF thread %d\n",Ret);
+                                handle_error_en(Ret, "pthread_create");
+                           }
+                          else 
+                          {
+                            fprintf(stderr,"C01 OF thread opened succesfully=> %d\n",Ret); 
+                         }
+                     }
+                     else if(!strcmp(inet_ntoa(cli_addr.sin_addr),C01_BACKEND_IP))
+                      { 
+                        new_sock = malloc(1);
+                        *new_sock = server_fd;
+                        fprintf(stderr," ACCEPTED CONNECTION FROM MCM DEVICE %s\n",inet_ntoa(cli_addr.sin_addr));
+                         Ret= pthread_create(&C01_backend_th,NULL,&C01_backend_thread,(void *)new_sock); 
+                          if(Ret)
+                           { 
+                             fprintf(stderr,"Error in Opening C01 BE thread %d\n",Ret);
+                              handle_error_en(Ret, "pthread_create");
+                           }
+                          else 
+                          {
+                            fprintf(stderr,"C01 BE thread opened succesfully=> %d\n",Ret); 
+                         }
+                     }
+                     else if(!strcmp(inet_ntoa(cli_addr.sin_addr),C01_SELF_IP))
+                      { 
+                        new_sock = malloc(1);
+                        *new_sock = server_fd;
+                        fprintf(stderr," ACCEPTED CONNECTION FROM MCM DEVICE %s\n",inet_ntoa(cli_addr.sin_addr));
+                         Ret= pthread_create(&C01_self_th,NULL,&C01_self_thread,(void *)new_sock); 
+                          if(Ret)
+                           { 
+                             fprintf(stderr,"Error in Opening C01 SELF thread %d\n",Ret);
+                              handle_error_en(Ret, "pthread_create");
+                           }
+                          else 
+                          {
+                            fprintf(stderr,"C01 SELF thread opened succesfully=> %d\n",Ret); 
+                         }
+                     }
+                       else if(!strcmp(inet_ntoa(cli_addr.sin_addr),C02_SENTINEL_IP))
+                      { 
+                        new_sock = malloc(1);
+                        *new_sock = server_fd;
+                        fprintf(stderr," ACCEPTED CONNECTION FROM MCM DEVICE %s\n",inet_ntoa(cli_addr.sin_addr));
+                         Ret= pthread_create(&C02_sen_th,NULL,&C02_sentinel_thread,(void *)new_sock); 
+                          if(Ret)
+                           { 
+                             fprintf(stderr,"Error in Opening C02 SEN thread %d\n",Ret);
+                              handle_error_en(Ret, "pthread_create");
+                           }
+                          else 
+                          {
+                            fprintf(stderr,"SENTINEL C02 thread opened succesfully=> %d\n",Ret); 
+                         }
+                     }
+                     else if(!strcmp(inet_ntoa(cli_addr.sin_addr),C02_FRONT_IP))
+                      { 
+                        new_sock = malloc(1);
+                        *new_sock = server_fd;
+                        fprintf(stderr," ACCEPTED CONNECTION FROM MCM DEVICE %s\n",inet_ntoa(cli_addr.sin_addr));
+                         Ret= pthread_create(&C02_front_th,NULL,&C02_front_thread,(void *)new_sock); 
+                          if(Ret)
+                           { 
+                             fprintf(stderr,"Error in Opening C02 FE thread %d\n",Ret);
+                               handle_error_en(Ret, "pthread_create");
+                           }
+                          else 
+                          {
+                            fprintf(stderr,"C02 FRS thread opened succesfully=> %d\n",Ret); 
+                         }
+                     }
+                     else if(!strcmp(inet_ntoa(cli_addr.sin_addr),C02_FIBER_IP))
+                      { 
+                        new_sock = malloc(1);
+                        *new_sock = server_fd;
+                        fprintf(stderr," ACCEPTED CONNECTION FROM MCM DEVICE %s\n",inet_ntoa(cli_addr.sin_addr));
+                         Ret= pthread_create(&C02_fiber_th,NULL,&C02_fiber_thread,(void *)new_sock); 
+                          if(Ret)
+                           { 
+                             fprintf(stderr,"Error in Opening C02 OF thread %d\n",Ret);
+                                handle_error_en(Ret, "pthread_create");
+                           }
+                          else 
+                          {
+                            fprintf(stderr,"C02 Fiber thread opened succesfully=> %d\n",Ret); 
+                         }
+                     }
+                     else if(!strcmp(inet_ntoa(cli_addr.sin_addr),C02_BACKEND_IP))
+                      { 
+                        new_sock = malloc(1);
+                        *new_sock = server_fd;
+                        fprintf(stderr," ACCEPTED CONNECTION FROM MCM DEVICE %s\n",inet_ntoa(cli_addr.sin_addr));
+                         Ret= pthread_create(&C02_backend_th,NULL,&C02_backend_thread,(void *)new_sock); 
+                          if(Ret)
+                           { 
+                             fprintf(stderr,"Error in Opening C02 BE thread %d\n",Ret);
+                                handle_error_en(Ret, "pthread_create");
+                           }
+                          else 
+                          {
+                            fprintf(stderr,"C02 BE thread opened succesfully=> %d\n",Ret); 
+                         }
+                     }
+                     else if(!strcmp(inet_ntoa(cli_addr.sin_addr),C02_SELF_IP))
+                      { 
+                        new_sock = malloc(1);
+                        *new_sock = server_fd;
+                        fprintf(stderr," ACCEPTED CONNECTION FROM MCM DEVICE %s\n",inet_ntoa(cli_addr.sin_addr));
+                         Ret= pthread_create(&C02_self_th,NULL,&C02_self_thread,(void *)new_sock); 
+                          if(Ret)
+                           { 
+                             fprintf(stderr,"Error in Opening C02 SELF thread %d\n",Ret);
+                               handle_error_en(Ret, "pthread_create");
+                           }
+                          else 
+                          {
+                            fprintf(stderr,"C02 SELF thread opened succesfully=> %d\n",Ret); 
+                         }
+                     }
+                      else if(!strcmp(inet_ntoa(cli_addr.sin_addr),C03_SENTINEL_IP))
+                      { 
+                        new_sock = malloc(1);
+                        *new_sock = server_fd;
+                        fprintf(stderr," ACCEPTED CONNECTION FROM MCM DEVICE %s\n",inet_ntoa(cli_addr.sin_addr));
+                         Ret= pthread_create(&C03_sen_th,NULL,&C03_sentinel_thread,(void *)new_sock); 
+                          if(Ret)
+                           { 
+                             fprintf(stderr,"Error in Opening C03 SEN thread %d\n",Ret);
+                              handle_error_en(Ret, "pthread_create");
+                           }
+                          else 
+                          {
+                            fprintf(stderr,"C03 SEN thread opened succesfully=> %d\n",Ret); 
+                         }
+                     }
+                     else if(!strcmp(inet_ntoa(cli_addr.sin_addr),C03_FRONT_IP))
+                      { 
+                        new_sock = malloc(1);
+                        *new_sock = server_fd;
+                        fprintf(stderr," ACCEPTED CONNECTION FROM MCM DEVICE %s\n",inet_ntoa(cli_addr.sin_addr));
+                         Ret= pthread_create(&C03_front_th,NULL,&C03_front_thread,(void *)new_sock); 
+                          if(Ret)
+                           { 
+                             fprintf(stderr,"Error in Opening C03 FE thread %d\n",Ret);
+                               handle_error_en(Ret, "pthread_create");
+                           }
+                          else 
+                          {
+                            fprintf(stderr,"C03 FE thread opened succesfully=> %d\n",Ret); 
+                         }
+                     }
+                     else if(!strcmp(inet_ntoa(cli_addr.sin_addr),C03_FIBER_IP))
+                      { 
+                        new_sock = malloc(1);
+                        *new_sock = server_fd;
+                        fprintf(stderr," ACCEPTED CONNECTION FROM MCM DEVICE %s\n",inet_ntoa(cli_addr.sin_addr));
+                         Ret= pthread_create(&C03_fiber_th,NULL,&C03_fiber_thread,(void *)new_sock); 
+                          if(Ret)
+                           { 
+                             fprintf(stderr,"Error in Opening C03 OF thread %d\n",Ret);
+                                handle_error_en(Ret, "pthread_create");
+                           }
+                          else 
+                          {
+                            fprintf(stderr,"C03 OF thread opened succesfully=> %d\n",Ret); 
+                         }
+                     }
+                     else if(!strcmp(inet_ntoa(cli_addr.sin_addr),C03_BACKEND_IP))
+                      { 
+                        new_sock = malloc(1);
+                        *new_sock = server_fd;
+                        fprintf(stderr," ACCEPTED CONNECTION FROM MCM DEVICE %s\n",inet_ntoa(cli_addr.sin_addr));
+                         Ret= pthread_create(&C03_backend_th,NULL,&C03_backend_thread,(void *)new_sock); 
+                          if(Ret)
+                           { 
+                             fprintf(stderr,"Error in Opening C03 BE thread %d\n",Ret);
+                              handle_error_en(Ret, "pthread_create");
+                           }
+                          else 
+                          {
+                            fprintf(stderr,"C03 BE thread opened succesfully=> %d\n",Ret); 
+                         }
+                     }
+                     else if(!strcmp(inet_ntoa(cli_addr.sin_addr),C03_SELF_IP))
+                      { 
+                        new_sock = malloc(1);
+                        *new_sock = server_fd;
+                        fprintf(stderr," ACCEPTED CONNECTION FROM MCM DEVICE %s\n",inet_ntoa(cli_addr.sin_addr));
+                         Ret= pthread_create(&C03_self_th,NULL,&C03_self_thread,(void *)new_sock); 
+                          if(Ret)
+                           { 
+                             fprintf(stderr,"Error in Opening C03 SELF thread %d\n",Ret);
+                              handle_error_en(Ret, "pthread_create");
+                           }
+                          else 
+                          {
+                            fprintf(stderr,"C03 SELF thread opened succesfully=> %d\n",Ret); 
+                         }
+                     }
+                       else if(!strcmp(inet_ntoa(cli_addr.sin_addr),C04_SENTINEL_IP))
+                      { 
+                        new_sock = malloc(1);
+                        *new_sock = server_fd;
+                        fprintf(stderr," ACCEPTED CONNECTION FROM MCM DEVICE %s\n",inet_ntoa(cli_addr.sin_addr));
+                         Ret= pthread_create(&C04_sen_th,NULL,&C04_sentinel_thread,(void *)new_sock); 
+                          if(Ret)
+                           { 
+                             fprintf(stderr,"Error in Opening C04 SEN thread %d\n",Ret);
+                              handle_error_en(Ret, "pthread_create");
+                           }
+                          else 
+                          {
+                            fprintf(stderr,"C04 SEN thread opened succesfully=> %d\n",Ret); 
+                         }
+                     }
+                     else if(!strcmp(inet_ntoa(cli_addr.sin_addr),C04_FRONT_IP))
+                      { 
+                        new_sock = malloc(1);
+                        *new_sock = server_fd;
+                        fprintf(stderr," ACCEPTED CONNECTION FROM MCM DEVICE %s\n",inet_ntoa(cli_addr.sin_addr));
+                         Ret= pthread_create(&C04_front_th,NULL,&C04_front_thread,(void *)new_sock); 
+                          if(Ret)
+                           { 
+                             fprintf(stderr,"Error in Opening C04 FE thread %d\n",Ret);
+                              handle_error_en(Ret, "pthread_create");
+                           }
+                          else 
+                          {
+                            fprintf(stderr,"C04 FE thread opened succesfully=> %d\n",Ret); 
+                         }
+                     }
+                     else if(!strcmp(inet_ntoa(cli_addr.sin_addr),C04_FIBER_IP))
+                      { 
+                        new_sock = malloc(1);
+                        *new_sock = server_fd;
+                        fprintf(stderr," ACCEPTED CONNECTION FROM MCM DEVICE %s\n",inet_ntoa(cli_addr.sin_addr));
+                         Ret= pthread_create(&C01_fiber_th,NULL,&C04_fiber_thread,(void *)new_sock); 
+                          if(Ret)
+                           { 
+                             fprintf(stderr,"Error in Opening C04 OF thread %d\n",Ret);
+                              handle_error_en(Ret, "pthread_create");
+                           }
+                          else 
+                          {
+                            fprintf(stderr,"C04 OF thread opened succesfully=> %d\n",Ret); 
+                         }
+                     }
+                     else if(!strcmp(inet_ntoa(cli_addr.sin_addr),C04_BACKEND_IP))
+                      { 
+                        new_sock = malloc(1);
+                        *new_sock = server_fd;
+                        fprintf(stderr," ACCEPTED CONNECTION FROM MCM DEVICE %s\n",inet_ntoa(cli_addr.sin_addr));
+                         Ret= pthread_create(&C04_backend_th,NULL,&C04_backend_thread,(void *)new_sock); 
+                          if(Ret)
+                           { 
+                             fprintf(stderr,"Error in Opening C04 BE thread %d\n",Ret);
+                              handle_error_en(Ret, "pthread_create");
+                           }
+                          else 
+                          {
+                            fprintf(stderr,"C04 BE thread opened succesfully=> %d\n",Ret); 
+                         }
+                     }
+                     else if(!strcmp(inet_ntoa(cli_addr.sin_addr),C04_SELF_IP))
+                      { 
+                        new_sock = malloc(1);
+                        *new_sock = server_fd;
+                        fprintf(stderr," ACCEPTED CONNECTION FROM MCM DEVICE %s\n",inet_ntoa(cli_addr.sin_addr));
+                         Ret= pthread_create(&C04_self_th,NULL,&C04_self_thread,(void *)new_sock); 
+                          if(Ret)
+                           { 
+                             fprintf(stderr,"Error in Opening C04 SELF thread %d\n",Ret);
+                              handle_error_en(Ret, "pthread_create");
+                           }
+                          else 
+                          {
+                            fprintf(stderr,"C04 SELF thread opened succesfully=> %d\n",Ret); 
+                         }
+                     }
+                       else if(!strcmp(inet_ntoa(cli_addr.sin_addr),C05_SENTINEL_IP))
+                      { 
+                        new_sock = malloc(1);
+                        *new_sock = server_fd;
+                        fprintf(stderr," ACCEPTED CONNECTION FROM MCM DEVICE %s\n",inet_ntoa(cli_addr.sin_addr));
+                         Ret= pthread_create(&C05_sen_th,NULL,&C05_sentinel_thread,(void *)new_sock); 
+                          if(Ret)
+                           { 
+                             fprintf(stderr,"Error in Opening C05 SEN thread %d\n",Ret);
+                               handle_error_en(Ret, "pthread_create");
+                           }
+                          else 
+                          {
+                            fprintf(stderr,"C05 SEN thread opened succesfully=> %d\n",Ret); 
+                         }
+                     }
+                     else if(!strcmp(inet_ntoa(cli_addr.sin_addr),C05_FRONT_IP))
+                      { 
+                        new_sock = malloc(1);
+                        *new_sock = server_fd;
+                        fprintf(stderr," ACCEPTED CONNECTION FROM MCM DEVICE %s\n",inet_ntoa(cli_addr.sin_addr));
+                         Ret= pthread_create(&C05_front_th,NULL,&C05_front_thread,(void *)new_sock); 
+                          if(Ret)
+                           { 
+                             fprintf(stderr,"Error in Opening C05 FE thread %d\n",Ret);
+                               handle_error_en(Ret, "pthread_create");
+                           }
+                          else 
+                          {
+                            fprintf(stderr,"C05 FE thread opened succesfully=> %d\n",Ret); 
+                         }
+                     }
+                     else if(!strcmp(inet_ntoa(cli_addr.sin_addr),C05_FIBER_IP))
+                      { 
+                        new_sock = malloc(1);
+                        *new_sock = server_fd;
+                        fprintf(stderr," ACCEPTED CONNECTION FROM MCM DEVICE %s\n",inet_ntoa(cli_addr.sin_addr));
+                         Ret= pthread_create(&C05_fiber_th,NULL,&C05_fiber_thread,(void *)new_sock); 
+                          if(Ret)
+                           { 
+                             fprintf(stderr,"Error in Opening C05 OF thread %d\n",Ret);
+                              handle_error_en(Ret, "pthread_create");
+                           }
+                          else 
+                          {
+                            fprintf(stderr,"C05 OF thread opened succesfully=> %d\n",Ret); 
+                         }
+                     }
+                     else if(!strcmp(inet_ntoa(cli_addr.sin_addr),C05_BACKEND_IP))
+                      { 
+                        new_sock = malloc(1);
+                        *new_sock = server_fd;
+                        fprintf(stderr," ACCEPTED CONNECTION FROM MCM DEVICE %s\n",inet_ntoa(cli_addr.sin_addr));
+                         Ret= pthread_create(&C05_backend_th,NULL,&C05_backend_thread,(void *)new_sock); 
+                          if(Ret)
+                           { 
+                             fprintf(stderr,"Error in Opening C05 BE thread %d\n",Ret);
+                              handle_error_en(Ret, "pthread_create");
+                           }
+                          else 
+                          {
+                            fprintf(stderr,"C05 BE thread opened succesfully=> %d\n",Ret); 
+                         }
+                     }
+                     else if(!strcmp(inet_ntoa(cli_addr.sin_addr),C05_SELF_IP))
+                      { 
+                        new_sock = malloc(1);
+                        *new_sock = server_fd;
+                        fprintf(stderr," ACCEPTED CONNECTION FROM MCM DEVICE %s\n",inet_ntoa(cli_addr.sin_addr));
+                         Ret= pthread_create(&C05_self_th,NULL,&C05_self_thread,(void *)new_sock); 
+                          if(Ret)
+                           { 
+                             fprintf(stderr,"Error in Opening C05 SELF thread %d\n",Ret);
+                               handle_error_en(Ret, "pthread_create");
+                           }
+                          else 
+                          {
+                            fprintf(stderr,"C05 SELF thread opened succesfully=> %d\n",Ret); 
+                         }
+                      }
+                        else if(!strcmp(inet_ntoa(cli_addr.sin_addr),C06_SENTINEL_IP))
+                      { 
+                        new_sock = malloc(1);
+                        *new_sock = server_fd;
+                        fprintf(stderr," ACCEPTED CONNECTION FROM MCM DEVICE %s\n",inet_ntoa(cli_addr.sin_addr));
+                         Ret= pthread_create(&C06_sen_th,NULL,&C06_sentinel_thread,(void *)new_sock); 
+                          if(Ret)
+                           { 
+                             fprintf(stderr,"Error in Opening C06 SEN thread %d\n",Ret);
+                               handle_error_en(Ret, "pthread_create");
+                           }
+                          else 
+                          {
+                            fprintf(stderr,"C06 SEN thread opened succesfully=> %d\n",Ret); 
+                         }
+                     }
+                     else if(!strcmp(inet_ntoa(cli_addr.sin_addr),C06_FRONT_IP))
+                      { 
+                        new_sock = malloc(1);
+                        *new_sock = server_fd;
+                        fprintf(stderr," ACCEPTED CONNECTION FROM MCM DEVICE %s\n",inet_ntoa(cli_addr.sin_addr));
+                         Ret= pthread_create(&C06_front_th,NULL,&C06_front_thread,(void *)new_sock); 
+                          if(Ret)
+                           { 
+                             fprintf(stderr,"Error in Opening C06 FE thread %d\n",Ret);
+                               handle_error_en(Ret, "pthread_create");
+                           }
+                          else 
+                          {
+                            fprintf(stderr,"C06 FE thread opened succesfully=> %d\n",Ret); 
+                         }
+                     }
+                     else if(!strcmp(inet_ntoa(cli_addr.sin_addr),C06_FIBER_IP))
+                      { 
+                        new_sock = malloc(1);
+                        *new_sock = server_fd;
+                        fprintf(stderr," ACCEPTED CONNECTION FROM MCM DEVICE %s\n",inet_ntoa(cli_addr.sin_addr));
+                         Ret= pthread_create(&C01_fiber_th,NULL,&C06_fiber_thread,(void *)new_sock); 
+                          if(Ret)
+                           { 
+                             fprintf(stderr,"Error in Opening C06 OF thread %d\n",Ret);
+                              handle_error_en(Ret, "pthread_create");
+                           }
+                          else 
+                          {
+                            fprintf(stderr,"C06 OF thread opened succesfully=> %d\n",Ret); 
+                         }
+                     }
+                     else if(!strcmp(inet_ntoa(cli_addr.sin_addr),C06_BACKEND_IP))
+                      { 
+                        new_sock = malloc(1);
+                        *new_sock = server_fd;
+                        fprintf(stderr," ACCEPTED CONNECTION FROM MCM DEVICE %s\n",inet_ntoa(cli_addr.sin_addr));
+                         Ret= pthread_create(&C06_backend_th,NULL,&C06_backend_thread,(void *)new_sock); 
+                          if(Ret)
+                           { 
+                             fprintf(stderr,"Error in Opening C06 BE thread %d\n",Ret);
+                              handle_error_en(Ret, "pthread_create");
+                           }
+                          else 
+                          {
+                            fprintf(stderr,"C06 BE thread opened succesfully=> %d\n",Ret); 
+                         }
+                     }
+                     else if(!strcmp(inet_ntoa(cli_addr.sin_addr),C06_SELF_IP))
+                      { 
+                        new_sock = malloc(1);
+                        *new_sock = server_fd;
+                        fprintf(stderr," ACCEPTED CONNECTION FROM MCM DEVICE %s\n",inet_ntoa(cli_addr.sin_addr));
+                         Ret= pthread_create(&C06_self_th,NULL,&C06_self_thread,(void *)new_sock); 
+                          if(Ret)
+                           { 
+                             fprintf(stderr,"Error in Opening C06 SELF thread %d\n",Ret);
+                           }
+                          else 
+                          {
+                            fprintf(stderr,"C06 SELF thread opened succesfully=> %d\n",Ret); 
+                         }
+                      }
+                      else if(!strcmp(inet_ntoa(cli_addr.sin_addr),C08_SENTINEL_IP))
+                      { 
+                        new_sock = malloc(1);
+                        *new_sock = server_fd;
+                        fprintf(stderr," ACCEPTED CONNECTION FROM MCM DEVICE %s\n",inet_ntoa(cli_addr.sin_addr));
+                         Ret= pthread_create(&C08_sen_th,NULL,&C08_sentinel_thread,(void *)new_sock); 
+                          if(Ret)
+                           { 
+                             fprintf(stderr,"Error in Opening C08 SEN thread %d\n",Ret);
+                              handle_error_en(Ret, "pthread_create");
+                           }
+                          else 
+                          {
+                            fprintf(stderr,"C08 SEN thread opened succesfully=> %d\n",Ret); 
+                         }
+                     }
+                     else if(!strcmp(inet_ntoa(cli_addr.sin_addr),C08_FRONT_IP))
+                      { 
+                        new_sock = malloc(1);
+                        *new_sock = server_fd;
+                        fprintf(stderr," ACCEPTED CONNECTION FROM MCM DEVICE %s\n",inet_ntoa(cli_addr.sin_addr));
+                         Ret= pthread_create(&C08_front_th,NULL,&C08_front_thread,(void *)new_sock); 
+                          if(Ret)
+                           { 
+                             fprintf(stderr,"Error in Opening C08 FE thread %d\n",Ret);
+                              handle_error_en(Ret, "pthread_create");
+                           }
+                          else 
+                          {
+                            fprintf(stderr,"C08 FE thread opened succesfully=> %d\n",Ret); 
+                         }
+                     }
+                     else if(!strcmp(inet_ntoa(cli_addr.sin_addr),C08_FIBER_IP))
+                      { 
+                        new_sock = malloc(1);
+                        *new_sock = server_fd;
+                        fprintf(stderr," ACCEPTED CONNECTION FROM MCM DEVICE %s\n",inet_ntoa(cli_addr.sin_addr));
+                         Ret= pthread_create(&C08_fiber_th,NULL,&C08_fiber_thread,(void *)new_sock); 
+                          if(Ret)
+                           { 
+                             fprintf(stderr,"Error in Opening C08 OF thread %d\n",Ret);
+                               handle_error_en(Ret, "pthread_create");
+                           }
+                          else 
+                          {
+                            fprintf(stderr,"C08 OF thread opened succesfully=> %d\n",Ret); 
+                         }
+                     }
+                     else if(!strcmp(inet_ntoa(cli_addr.sin_addr),C08_BACKEND_IP))
+                      { 
+                        new_sock = malloc(1);
+                        *new_sock = server_fd;
+                        fprintf(stderr," ACCEPTED CONNECTION FROM MCM DEVICE %s\n",inet_ntoa(cli_addr.sin_addr));
+                         Ret= pthread_create(&C08_backend_th,NULL,&C08_backend_thread,(void *)new_sock); 
+                          if(Ret)
+                           { 
+                             fprintf(stderr,"Error in Opening C08 BE thread %d\n",Ret);
+                              handle_error_en(Ret, "pthread_create");
+                           }
+                          else 
+                          {
+                            fprintf(stderr,"C08 BE thread opened succesfully=> %d\n",Ret); 
+                         }
+                     }
+                     else if(!strcmp(inet_ntoa(cli_addr.sin_addr),C08_SELF_IP))
+                      { 
+                        new_sock = malloc(1);
+                        *new_sock = server_fd;
+                        fprintf(stderr," ACCEPTED CONNECTION FROM MCM DEVICE %s\n",inet_ntoa(cli_addr.sin_addr));
+                         Ret= pthread_create(&C08_self_th,NULL,&C08_self_thread,(void *)new_sock); 
+                          if(Ret)
+                           { 
+                             fprintf(stderr,"Error in Opening C08 SELF thread %d\n",Ret);
+                           }
+                          else 
+                          {
+                            fprintf(stderr,"C08 SELF thread opened succesfully=> %d\n",Ret); 
+                         }
+                     }
+                   /*  else if(!strcmp(inet_ntoa(cli_addr.sin_addr),C09_SENTINEL_IP))
+                      { 
+                        new_sock = malloc(1);
+                        *new_sock = server_fd;
+                        fprintf(stderr," ACCEPTED CONNECTION FROM MCM DEVICE %s\n",inet_ntoa(cli_addr.sin_addr));
+                         Ret= pthread_create(&C09_sen_th,NULL,&C09_sentinel_thread,(void *)new_sock); 
+                          if(Ret)
+                           { 
+                             fprintf(stderr,"Error in Opening SELF thread %d\n",Ret);
+                           }
+                          else 
+                          {
+                            fprintf(stderr,"SELF thread opened succesfully=> %d\n",Ret); 
+                         }
+                     }
+                     else if(!strcmp(inet_ntoa(cli_addr.sin_addr),C09_FRONT_IP))
+                      { 
+                        new_sock = malloc(1);
+                        *new_sock = server_fd;
+                        fprintf(stderr," ACCEPTED CONNECTION FROM MCM DEVICE %s\n",inet_ntoa(cli_addr.sin_addr));
+                         Ret= pthread_create(&C09_front_th,NULL,&C09_front_thread,(void *)new_sock); 
+                          if(Ret)
+                           { 
+                             fprintf(stderr,"Error in Opening SELF thread %d\n",Ret);
+                           }
+                          else 
+                          {
+                            fprintf(stderr,"SELF thread opened succesfully=> %d\n",Ret); 
+                         }
+                     }
+                     else if(!strcmp(inet_ntoa(cli_addr.sin_addr),C09_FIBER_IP))
+                      { 
+                        new_sock = malloc(1);
+                        *new_sock = server_fd;
+                        fprintf(stderr," ACCEPTED CONNECTION FROM MCM DEVICE %s\n",inet_ntoa(cli_addr.sin_addr));
+                         Ret= pthread_create(&C09_fiber_th,NULL,&C09_fiber_thread,(void *)new_sock); 
+                          if(Ret)
+                           { 
+                             fprintf(stderr,"Error in Opening SELF thread %d\n",Ret);
+                           }
+                          else 
+                          {
+                            fprintf(stderr,"SELF thread opened succesfully=> %d\n",Ret); 
+                         }
+                     }
+                     else if(!strcmp(inet_ntoa(cli_addr.sin_addr),C09_BACKEND_IP))
+                      { 
+                        new_sock = malloc(1);
+                        *new_sock = server_fd;
+                        fprintf(stderr," ACCEPTED CONNECTION FROM MCM DEVICE %s\n",inet_ntoa(cli_addr.sin_addr));
+                         Ret= pthread_create(&C09_backend_th,NULL,&C09_backend_thread,(void *)new_sock); 
+                          if(Ret)
+                           { 
+                             fprintf(stderr,"Error in Opening SELF thread %d\n",Ret);
+                           }
+                          else 
+                          {
+                            fprintf(stderr,"SELF thread opened succesfully=> %d\n",Ret); 
+                         }
+                     }
+                     else if(!strcmp(inet_ntoa(cli_addr.sin_addr),C09_SELF_IP))
+                      { 
+                        new_sock = malloc(1);
+                        *new_sock = server_fd;
+                        fprintf(stderr," ACCEPTED CONNECTION FROM MCM DEVICE %s\n",inet_ntoa(cli_addr.sin_addr));
+                         Ret= pthread_create(&C09_self_th,NULL,&C09_self_thread,(void *)new_sock); 
+                          if(Ret)
+                           { 
+                             fprintf(stderr,"Error in Opening SELF thread %d\n",Ret);
+                           }
+                          else 
+                          {
+                            fprintf(stderr,"SELF thread opened succesfully=> %d\n",Ret); 
+                         }
+                     } */
+                     else
+                     { fprintf(stderr,"######### NOT AUTHORIZED IP ##########\n"); }
+         
+          i++;
+         }  
+  
+  pthread_join(high,NULL);	
+  pthread_join(pyenv,NULL); 
+  pthread_join(servo,NULL);
+  pthread_join(sen_th,NULL); 
+  pthread_join(fiber_th,NULL);
+  pthread_join(front_th,NULL);
+  pthread_join(backend_th,NULL);
+  pthread_join(self_th,NULL);
+  pthread_join(C01_sen_th,NULL); 
+  pthread_join(C01_fiber_th,NULL);
+  pthread_join(C01_front_th,NULL);
+  pthread_join(C01_backend_th,NULL);
+  pthread_join(C01_self_th,NULL);
+  pthread_join(C02_sen_th,NULL); 
+  pthread_join(C02_fiber_th,NULL);
+  pthread_join(C02_front_th,NULL);
+  pthread_join(C02_backend_th,NULL);
+  pthread_join(C02_self_th,NULL);
+  pthread_join(C03_sen_th,NULL); 
+  pthread_join(C03_fiber_th,NULL);
+  pthread_join(C03_front_th,NULL);
+  pthread_join(C03_backend_th,NULL);
+  pthread_join(C03_self_th,NULL);
+  pthread_join(C04_sen_th,NULL); 
+  pthread_join(C04_fiber_th,NULL);
+  pthread_join(C04_front_th,NULL);
+  pthread_join(C04_backend_th,NULL);
+  pthread_join(C04_self_th,NULL);
+  pthread_join(C05_sen_th,NULL); 
+  pthread_join(C05_fiber_th,NULL);
+  pthread_join(C05_front_th,NULL);
+  pthread_join(C05_backend_th,NULL);
+  pthread_join(C05_self_th,NULL);
+  pthread_join(C06_sen_th,NULL); 
+  pthread_join(C06_fiber_th,NULL);
+  pthread_join(C06_front_th,NULL);
+  pthread_join(C06_backend_th,NULL);
+  pthread_join(C06_self_th,NULL);
+  pthread_join(C09_sen_th,NULL); 
+  pthread_join(C09_fiber_th,NULL);
+  pthread_join(C09_front_th,NULL);
+  pthread_join(C09_backend_th,NULL);
+  pthread_join(C09_self_th,NULL);
+  pthread_join(C08_sen_th,NULL); 
+  pthread_join(C08_fiber_th,NULL);
+  pthread_join(C08_front_th,NULL);
+  pthread_join(C08_backend_th,NULL);
+  pthread_join(C08_self_th,NULL);
+  pthread_join(gui,NULL);
+  pthread_mutex_destroy(&lock);    
+     return 0; 
+}
+#else
+int main(void) {
+    fprintf(stderr, "server2 support not compiled in\n");
+    exit(1);
+}
+#endif
+

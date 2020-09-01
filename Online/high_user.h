@@ -1,0 +1,30 @@
+#ifndef _HIGHUSER_H
+#define _HIGHUSER_H
+
+#include<stdio.h>
+#include<pthread.h>
+#include<string.h>
+#include <stdlib.h>
+#include <readline/readline.h>
+#include <readline/history.h>
+
+void* highuser( void* parameters);
+void* lowuser( void* parameters);
+
+typedef enum { C00,C01,C02,C03,C04,C05,C06,C08,C09,C10,C11,C12,C13,C14,E02,E03,E04,E05,E06,S01,S02,S03,S04,
+                S06,W01,W02,W03,W04,W05,W06,END } ant_name;
+
+typedef enum { create,add,cmd2sub,deluser,showuser,UEND} udef;
+
+typedef enum {dasinit,addp,delprj,startscan,stopscan,finish,DEND} dastype;
+
+int ret,no_element;
+char *name;
+char *token;
+
+void antenna(int i,char cmd1[][20]);
+void dasdef( int r);
+void antenna_list(int p);
+
+
+#endif

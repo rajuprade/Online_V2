@@ -1,0 +1,14 @@
+######################################################################
+# trkset.dat
+#
+# for Teleset program
+#
+# file to load Servo parameters
+# ABC 2 (->filename), 8x11 matrix
+#
+# columns:
+# abc, Azimuth offset, Elevation offset, ant latitude, ant longitude
+#
+# 
+######################################################################
++000:00:00 -000:00:00 19.0927 -74.0536

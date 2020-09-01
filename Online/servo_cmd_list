@@ -1,0 +1,41 @@
+
+/***** All commands are original TRACk command of Servo System ****/
+command name : scan
+
+Parameter name : az_offset,el_offset,ra_offset,dec_offset,scan_length
+
+Sample : 1800,1900,0,0,350
+
+Global parameters : Sourcename,ra_mean,dec_mean,epoch,ra_app,dec_app,ra_offset,dra,dec_offset,ddec,d_ref_time,az_offset,
+		  daz,el_offset,del,ref_time_offset,current_time,scan_length
+
+
+Command Name : trackobject
+
+Parameter name : source_name,ra_mean,dec_mean,epoch
+
+Sample  : 3C147,10:10:10,10:10:10,2000.0
+
+Global parameter : ra_app,dec_app,target_epoch,ra_offset,dra,dec_offset,ddec,d_ref_time,az_offset,daz,el_offset,del,
+                  ref_time_offset,current_time,on_source_flag,tracking_on
+
+Command name : trackOffazel
+
+Parameter name : az_offset,el_offset
+
+sample : 1900.00,1800.00
+
+Global parameter : Sourcename,ra_mean,dec_mean,epoch,ra_app,dec_app,target_epoch,ra_offset,dra,dec_offset,ddec,d_ref_time,
+                   az_offset,daz,el_offset,del,ref_time_offset,current_time
+
+
+Command name : trackOffradec
+
+Paramter name : ra_offset,dec_offset
+
+Global parameter : Sourcename,ra_mean,dec_mean,epoch,ra_app,dec_app,target_epoch,dra,ddec,d_ref_time,
+                  az_offset,daz,el_offset,del,ref_time_offset,current_time
+
+
+
+

@@ -1,0 +1,8 @@
+#USER
+1 
+#Sub Array
+1  
+#Number of Antenna
+4 
+# Names of Antenna
+S02 S01 W01 C12 
